@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/background">
+
+	<TableLayout android:id="@+id/TableLayout01" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+		    android:stretchColumns="*" 
+	>
+	<TableRow android:paddingTop="15px" >
+		<TextView  
+		    android:id="@+id/displayText"
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content" 
+		    android:paddingLeft="15px"
+		    android:paddingTop="10px"
+		    android:text="@string/ringToneTitleText"
+		    android:textColor="@color/display_text_header"
+		    android:shadowRadius="2.5"  
+			android:shadowDx="1"  
+			android:shadowDy="1"
+		    android:gravity="left" android:typeface="normal" android:textSize="25px" 
+		android:shadowColor="#000000"/>
+		<ImageView android:src="@drawable/title_icon2" 
+		    android:layout_width="fill_parent" 
+		    android:layout_height="wrap_content" 
+		    android:gravity="right"
+		    /> 
+	</TableRow>
+	</TableLayout>
+	
+<!--  Buttons -->
+
+	<TableLayout android:id="@+id/TableLayout02" 
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:stretchColumns="1" 
+	>
+	 <TableRow android:paddingTop="35px" android:layout_height="fill_parent" >
+		
+		<TextView android:id="@+id/textview" android:paddingTop="30px" android:layout_width="wrap_content" android:paddingLeft="20px" android:layout_height="fill_parent"/>  
+
+		<Button android:text="@string/textRingAndVibrate" 
+				android:id="@+id/btn_ringAndVibrate"
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:gravity="center_horizontal|fill_vertical"
+				android:textColor="@color/display_text_button"
+				android:textSize="25px"
+				android:onClick="onRingAndVibrate"
+				android:longClickable="true"
+				style="@style/CustomButton"
+		/>
+		<TextView android:layout_width="wrap_content" android:paddingRight="20px" android:layout_height="fill_parent"/>   
+	 </TableRow>
+	 
+	 <TableRow android:paddingTop="15px" android:layout_height="50dip">
+		
+		<TextView android:paddingTop="30px" android:layout_width="wrap_content" android:layout_height="fill_parent"/>   
+
+		<Button android:text="@string/textRingOnly" 
+				android:id="@+id/btn_ringOnly"
+				android:layout_span="1"
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:gravity="center_horizontal|fill_vertical"
+				android:textColor="@color/display_text_button"
+				android:textSize="25px"
+				android:onClick="onRingOnly"
+				style="@style/CustomButton"
+		>
+		</Button>
+		<TextView android:layout_height="fill_parent"/>  
+	 </TableRow>
+	 <TableRow android:paddingTop="15px" >
+		
+		<TextView android:paddingTop="30px" android:layout_width="wrap_content" android:layout_height="fill_parent"/>  
+
+		<Button android:text="@string/textVibrateOnly" 
+				android:id="@+id/btn_vibrateOnly"
+				android:layout_span="1"
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:gravity="center_horizontal|fill_vertical"
+				android:textColor="@color/display_text_button"
+				android:textSize="25px"
+				android:onClick="onVibrateOnly"
+				style="@style/CustomButton"
+		>
+		</Button>
+		<TextView android:layout_height="fill_parent"/>  
+	 </TableRow>
+	 <TableRow android:paddingTop="15px" >
+		
+		<TextView android:paddingTop="30px" android:layout_width="wrap_content" android:layout_height="fill_parent"/>    
+		 
+		<Button android:text="@string/textSilent" 
+				android:id="@+id/btn_silent"
+				android:layout_span="1"
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:gravity="center_horizontal|fill_vertical"
+				android:textColor="@color/display_text_button"
+				android:textSize="25px"
+				android:onClick="onSilent"
+				style="@style/CustomButton"
+		>
+		</Button>
+		<TextView android:layout_height="fill_parent"/>  
+	 </TableRow>
+	 <TableRow android:paddingTop="15px" >
+		
+		<TextView android:paddingTop="30px" android:layout_width="wrap_content" android:layout_height="fill_parent"/>
+		  
+		<Button android:text="@string/textAirplaneOff" 
+				android:id="@+id/btn_airplane"
+				android:layout_span="1"
+				android:layout_width="fill_parent" 
+				android:layout_height="fill_parent"
+				android:gravity="center_horizontal|fill_vertical"
+				android:textColor="@color/display_text_button"
+				android:textSize="25px"
+				android:onClick="onAirplane"
+				style="@style/CustomButton"
+		>
+		</Button>
+		<TextView android:layout_height="fill_parent"/>  
+	 </TableRow>
+	</TableLayout>
+	
+		<TextView android:id="@+id/locationText" android:paddingTop="10px" 
+			android:layout_width="fill_parent" 
+			android:layout_height="fill_parent" 
+			android:gravity="center_vertical|center_horizontal"
+			android:textColor="@color/display_text_header"
+			/>
+
+</LinearLayout>

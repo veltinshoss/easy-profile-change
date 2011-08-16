@@ -39,13 +39,16 @@ public class SystemPropertySettingHandler extends SettingHandler {
 	@Override
 	public void activate(MainSettingsActivity activity) throws SettingNotFoundException {
 		mActivity = activity;
-		boolean enabled = Settings.System.getInt(activity.getContentResolver(), mPropertyName) == 1;
+		mSetting.value = mActivity.mProfileSetting.auto_rotation; 
+//		boolean enabled = Settings.System.getInt(activity.getContentResolver(), mPropertyName) == 1;
+		boolean enabled = mSetting.value == 1;
+		
 		updateSetting(true, enabled, 0);
 	}
 
 	@Override
 	public void deactivate() {
-		// do nothing
+		mActivity.mProfileSetting.auto_rotation = mSetting.value; 
 	}
 
 	@Override
@@ -61,7 +64,10 @@ public class SystemPropertySettingHandler extends SettingHandler {
 	@Override
 	public void onSwitched(boolean isSwitched) {
 		// update setting
-		Settings.System.putInt(mActivity.getContentResolver(), mPropertyName, isSwitched ? 1 : 0);
+		if(mSetting.directSettingActivation){
+			Settings.System.putInt(mActivity.getContentResolver(), mPropertyName, isSwitched ? 1 : 0);
+		}
+		mSetting.value = isSwitched ? 1 : 0;
 		updateSetting(true, isSwitched, 0);
 	}
 

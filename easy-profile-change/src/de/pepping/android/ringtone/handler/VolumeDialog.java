@@ -36,6 +36,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import de.pepping.android.ringtone.Constants;
 import de.pepping.android.ringtone.R;
 import de.pepping.android.ringtone.activity.MainSettingsActivity;
+import de.pepping.android.ringtone.fwk.Setting;
 
 public class VolumeDialog implements OnCancelListener, OnClickListener, OnSeekBarChangeListener, OnCheckedChangeListener {
 
@@ -67,7 +68,7 @@ public class VolumeDialog implements OnCancelListener, OnClickListener, OnSeekBa
 	};
 	
 	private AudioManager mManager;
-	private Activity mActivity;
+	private MainSettingsActivity mActivity;
 	private Dialog mDialog;
 
 	private Holder mRingerHolder;
@@ -76,8 +77,11 @@ public class VolumeDialog implements OnCancelListener, OnClickListener, OnSeekBa
 	private boolean mInitialChecked;
 	private boolean mChecked;
 	
-	public VolumeDialog(MainSettingsActivity activity) {
+	private Setting mSetting;
+	
+	public VolumeDialog(MainSettingsActivity activity, Setting setting) {
 		mActivity = activity;
+		mSetting = setting;
 	}
 
 	public void show() {
@@ -108,8 +112,10 @@ public class VolumeDialog implements OnCancelListener, OnClickListener, OnSeekBa
 			
 			if (useRingerVolume && i == 1) {
 				value = manager.getStreamVolume(STREAM_TYPES[i-1]); // use ringer volume
+				value = mSetting.valueList.get("1");
 			} else {
 				value = manager.getStreamVolume(STREAM_TYPES[i]);
+				value = mSetting.valueList.get(""+ i);
 			}
 			
 			max = manager.getStreamMaxVolume(STREAM_TYPES[i]);
@@ -158,6 +164,7 @@ public class VolumeDialog implements OnCancelListener, OnClickListener, OnSeekBa
 					//if (i == 1 && mChecked) continue; // ignore notification volume - we use ringer volume instead
 					seek = (SeekBar) dialog.findViewById(SLIDER_IDS[i]);
 					manager.setStreamVolume(STREAM_TYPES[i], seek.getProgress(), 0);
+					mSetting.valueList.put("" + i,seek.getProgress());
 				}
 				
 				Activity activity = mActivity;

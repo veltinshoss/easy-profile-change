@@ -35,7 +35,8 @@ public class WiFiSettingHandler extends SettingHandler {
 
 	private static final int STATE_INPROCESS = 0;
 	private static final int STATE_DONE = 1;
-
+	private boolean enabled;
+	
 	/**
 	 * WiFi status listener dynamically registered at start up
 	 * 
@@ -88,7 +89,7 @@ public class WiFiSettingHandler extends SettingHandler {
 			}
 		}
 	}
-
+	
 	private WiFiStateReceiver mWifiStateReceiver;
 	private WifiManager mWiFiManager;
 	private int mActionState = STATE_DONE;
@@ -100,19 +101,22 @@ public class WiFiSettingHandler extends SettingHandler {
 
 	@Override
 	public void onSwitched(boolean checked) {
-
-		// disable hotspot if it was enabled (important for android 2.2)
-		if (checked && Integer.parseInt(Build.VERSION.SDK) >= 8) {
-			WifiApManager wifiApManager = new WifiApManager(mActivity);
-			int state = wifiApManager.getWifiApState();
-			if (state == WifiApManager.WIFI_AP_STATE_ENABLED || state == WifiApManager.WIFI_AP_STATE_ENABLING) {
-				wifiApManager.setWifiApEnabled(false);
+		if(mSetting.directSettingActivation){
+			// disable hotspot if it was enabled (important for android 2.2)
+			if (checked && Integer.parseInt(Build.VERSION.SDK) >= 8) {
+				WifiApManager wifiApManager = new WifiApManager(mActivity);
+				int state = wifiApManager.getWifiApState();
+				if (state == WifiApManager.WIFI_AP_STATE_ENABLED || state == WifiApManager.WIFI_AP_STATE_ENABLING) {
+					wifiApManager.setWifiApEnabled(false);
+				}
 			}
+			mSetting.value = checked?1:0;
+			getWiFiManager().setWifiEnabled(checked);
+			updateWiFiState(checked ? WifiManager.WIFI_STATE_ENABLING : WifiManager.WIFI_STATE_DISABLING);
+		}else{
+			mSetting.value = checked?1:0;
+			updateWiFiState(checked ? WifiManager.WIFI_STATE_ENABLED : WifiManager.WIFI_STATE_DISABLED);
 		}
-
-		getWiFiManager().setWifiEnabled(checked);
-		updateWiFiState(checked ? WifiManager.WIFI_STATE_ENABLING : WifiManager.WIFI_STATE_DISABLING);
-
 	}
 
 	private WifiManager getWiFiManager() {
@@ -133,6 +137,9 @@ public class WiFiSettingHandler extends SettingHandler {
 	public void activate(MainSettingsActivity activity) {
 		mActivity = activity;
 
+		mSetting.value = mActivity.mProfileSetting.wifi; 
+		onSwitched(mSetting.value==1);
+		
 		// update state
 		updateWiFiState(getWiFiManager().getWifiState());
 
@@ -202,6 +209,7 @@ public class WiFiSettingHandler extends SettingHandler {
 
 	@Override
 	public void deactivate() {
+		mActivity.mProfileSetting.wifi = mSetting.value;
 		mActivity.unregisterReceiver(mWifiStateReceiver);
 	}
 

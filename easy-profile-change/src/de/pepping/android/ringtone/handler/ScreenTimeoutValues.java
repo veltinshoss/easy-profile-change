@@ -25,7 +25,7 @@ public class ScreenTimeoutValues {
 
 	// timeout intervals
 	private static int[] VALUES = {15, 30, 1, 2, 10};
-	private static int[] TIMEOUTS = {15000, 30000, 60000, 120000, 600000};
+	private static int[] TIMEOUTS = {20000, 30000, 60000, 120000, 600000};
 
 	private final Context mContext;
 	

@@ -72,6 +72,10 @@ public class RingerSettingHandler extends SettingHandler implements OnItemClickL
 		}
 		// register receiver
 		activity.registerReceiver(mReceiver, mFilter);
+		
+		mSetting.value = activity.mProfileSetting.ringer_mode;
+		setAudioManagerById((mSetting.value));
+		
 		updateState();
 	}
 
@@ -84,6 +88,7 @@ public class RingerSettingHandler extends SettingHandler implements OnItemClickL
 			mDialog.dismiss();
 			mDialog = null;
 		}
+		mActivity.mProfileSetting.ringer_mode = mSetting.value;
 	}
 
 	private Dialog createDialog() {
@@ -168,55 +173,95 @@ public class RingerSettingHandler extends SettingHandler implements OnItemClickL
 		if (manager == null) return;
 
 		// change audio settings
-		manager.setRingerMode(isSwitched ? AudioManager.RINGER_MODE_NORMAL : AudioManager.RINGER_MODE_SILENT);
+		if(mSetting.directSettingActivation){
+			manager.setRingerMode(isSwitched ? AudioManager.RINGER_MODE_NORMAL : AudioManager.RINGER_MODE_SILENT);
+		}
+		
+		int ringerMode = isSwitched ? AudioManager.RINGER_MODE_NORMAL : AudioManager.RINGER_MODE_SILENT;
+		int vibro = manager.getVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
+		
+		if(ringerMode == AudioManager.RINGER_MODE_SILENT){
+			mSetting.value = 0;
+		}else {
+			if(vibro == AudioManager.VIBRATE_SETTING_ON){
+				mSetting.value = 2;
+			}else{
+				mSetting.value = 3;
+			}
+		}
+		
+		
+		
 		// ringer notification is sent by Android itself
 		
 		validateState(manager);
 	}
 
 	private void validateState(AudioManager manager) {
-
-		int ringer = manager.getRingerMode();
-		
-		if (ringer != AudioManager.RINGER_MODE_SILENT 
-				&& ringer != AudioManager.RINGER_MODE_VIBRATE) {
+		if(mSetting.directSettingActivation){
+			int ringer = manager.getRingerMode();
 			
-			// if volume is zero set it to medium
-			int volume = manager.getStreamVolume(AudioManager.STREAM_RING);
-			if (volume == 0) {
-				manager.setStreamVolume(AudioManager.STREAM_RING, 4, 0);
-				manager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 4, 0);
+			if (ringer != AudioManager.RINGER_MODE_SILENT 
+					&& ringer != AudioManager.RINGER_MODE_VIBRATE) {
+				
+				// if volume is zero set it to medium
+				int volume = manager.getStreamVolume(AudioManager.STREAM_RING);
+				if (volume == 0) {
+					manager.setStreamVolume(AudioManager.STREAM_RING, 4, 0);
+					manager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 4, 0);
+				}
 			}
+			
+			// send internal volume changed notification
+			mActivity.sendBroadcast(new Intent(Constants.ACTION_VOLUME_UPDATED));
+		}else{
+			updateState();
 		}
-		
-		// send internal volume changed notification
-		mActivity.sendBroadcast(new Intent(Constants.ACTION_VOLUME_UPDATED));
 	}
 	
 	private void updateState() {
 		
-		final AudioManager manager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
-		if (manager == null) return;
-		
-		int ringer = manager.getRingerMode();
-		int vibro = manager.getVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
-		
-		int descr; int icon; boolean silent = false;
-		if (ringer == AudioManager.RINGER_MODE_SILENT) {
-			descr = R.string.txt_ringer_silent;
-			icon = R.drawable.ic_silent;
-			silent = true;
-		} else if (ringer == AudioManager.RINGER_MODE_NORMAL) {
-			if (vibro == AudioManager.VIBRATE_SETTING_ON) {
-				descr = R.string.txt_ringer_vibrosound;
-				icon = R.drawable.ic_vibro_sound;
+		int descr = 0; 
+		int icon =0; 
+		boolean silent = false;
+		if(mSetting.directSettingActivation){
+			final AudioManager manager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+			if (manager == null) return;
+			
+			int ringer = manager.getRingerMode();
+			int vibro = manager.getVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
+			
+			if (ringer == AudioManager.RINGER_MODE_SILENT) {
+				descr = R.string.txt_ringer_silent;
+				icon = R.drawable.ic_silent;
+				silent = true;
+			} else if (ringer == AudioManager.RINGER_MODE_NORMAL) {
+				if (vibro == AudioManager.VIBRATE_SETTING_ON) {
+					descr = R.string.txt_ringer_vibrosound;
+					icon = R.drawable.ic_vibro_sound;
+				} else {
+					descr = R.string.txt_ringer_sound;
+					icon = R.drawable.ic_sound;
+				}
 			} else {
+				descr = R.string.txt_ringer_vibro;
+				icon = R.drawable.ic_vibro;
+			}
+		}else{
+			if(mSetting.value==0){
+				descr = R.string.txt_ringer_silent;
+				icon = R.drawable.ic_silent;
+				silent = true;
+			}else if(mSetting.value==1){
+				descr = R.string.txt_ringer_vibro;
+				icon = R.drawable.ic_vibro;
+			}else if(mSetting.value==2){
 				descr = R.string.txt_ringer_sound;
 				icon = R.drawable.ic_sound;
+			}else if(mSetting.value==3){
+				descr = R.string.txt_ringer_vibrosound;
+				icon = R.drawable.ic_vibro_sound;
 			}
-		} else {
-			descr = R.string.txt_ringer_vibro;
-			icon = R.drawable.ic_vibro;
 		}
 
 		// update setting values
@@ -235,6 +280,12 @@ public class RingerSettingHandler extends SettingHandler implements OnItemClickL
 
 	public void onItemClick(AdapterView<?> arg0, View arg1, int index, long arg3) {
 		
+		setAudioManagerById(index);
+		
+		mDialog.hide();
+	}
+
+	private void setAudioManagerById(int index) {
 		AudioManager manager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
 		if (manager != null) {
 
@@ -245,32 +296,38 @@ public class RingerSettingHandler extends SettingHandler implements OnItemClickL
 				case 0: // silent
 					ringerMode = AudioManager.RINGER_MODE_SILENT;
 					vibroMode = AudioManager.VIBRATE_SETTING_ONLY_SILENT;
+					mSetting.value = 0;
 					break;
 				case 1: // vibro
 					ringerMode = AudioManager.RINGER_MODE_VIBRATE;
 					vibroMode = AudioManager.VIBRATE_SETTING_ON;
+					mSetting.value = 1;
 					break;
 				case 2: // sound
 					ringerMode = AudioManager.RINGER_MODE_NORMAL;
 					vibroMode = AudioManager.VIBRATE_SETTING_OFF;
+					mSetting.value = 2;
 					break;
 				case 3: // sound and vibro
 					ringerMode = AudioManager.RINGER_MODE_NORMAL;
 					vibroMode = AudioManager.VIBRATE_SETTING_ON;
+					mSetting.value = 3;
 					break;
 			}
 			
 			// update manager modes
 			
 			// update
-			manager.setVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER, vibroMode);
-			manager.setVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION, vibroMode);
-			manager.setRingerMode(ringerMode);
+			if(mSetting.directSettingActivation){
+				manager.setVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER, vibroMode);
+				manager.setVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION, vibroMode);
+				manager.setRingerMode(ringerMode);
+			}else{
+				
+			}
 			
 			validateState(manager);
 		}
-		
-		mDialog.hide();
 	}
 
 }

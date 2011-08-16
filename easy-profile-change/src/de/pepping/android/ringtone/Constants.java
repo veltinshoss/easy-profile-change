@@ -14,6 +14,7 @@ public interface Constants {
 	public static final String PREF_NOTIFICATION_VIBRATE = "prefNotificationVibrate";
 	public static final String PREF_SPLASH_SCREEN = "prefSplahScreen";
 	public static final String PREF_EXIT_APP = "prefExitApp";
+	public static final String PREF_DIRECT_SETTING_ACTIVATION = "prefDirectSettingActivation";
 	
 	
 	// QuickSettings

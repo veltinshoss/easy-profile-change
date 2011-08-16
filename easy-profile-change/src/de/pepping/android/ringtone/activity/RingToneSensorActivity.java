@@ -36,7 +36,7 @@ public class RingToneSensorActivity  extends GuiceActivity implements SensorEven
 	@InjectView(R.id.btn_airplane)
 	private Button btnAirplane;
 	
-	@InjectView(R.id.btn_ringAndVibrate)
+	@InjectView(R.id.btn_profile01)
 	private Button btnRingAndVibrate;
 	
 	@InjectView(R.id.btn_ringOnly)

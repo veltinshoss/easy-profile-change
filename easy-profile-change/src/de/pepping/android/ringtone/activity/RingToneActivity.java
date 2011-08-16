@@ -1,14 +1,7 @@
 package de.pepping.android.ringtone.activity;
 
-import java.io.BufferedInputStream;
-import java.io.EOFException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.TimeZone;
 
 import roboguice.activity.GuiceActivity;
@@ -26,14 +19,13 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -41,14 +33,15 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import de.pepping.android.ringtone.Constants;
 import de.pepping.android.ringtone.R;
 import de.pepping.android.ringtone.database.DataHelper;
 import de.pepping.android.ringtone.dialog.InstructionDialog;
-import de.pepping.android.ringtone.fwk.ProfileSettings;
 import de.pepping.android.ringtone.handler.UpdateTimer;
+import de.pepping.android.ringtone.quickactions.ActionItem;
+import de.pepping.android.ringtone.quickactions.QuickAction;
 import de.pepping.android.ringtone.service.TimerService;
+import de.pepping.android.ringtone.util.ProfileSettingUtil;
 import de.pepping.android.ringtone.util.RingtoneUtil;
 
 public class RingToneActivity extends GuiceActivity implements Constants{
@@ -63,17 +56,17 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	@InjectView(R.id.btn_airplane)
 	private Button btnAirplane;
 	
-	@InjectView(R.id.btn_ringAndVibrate)
-	private Button btnRingAndVibrate;
+	@InjectView(R.id.btn_profile01)
+	private Button btnProfile01;
 	
-	@InjectView(R.id.btn_ringOnly)
-	private Button btnRingOnly;
+	@InjectView(R.id.btn_profile02)
+	private Button btnProfile02;
 	
-	@InjectView(R.id.btn_vibrateOnly)
-	private Button btnVibrateOnly;
+	@InjectView(R.id.btn_profile03)
+	private Button btnProfile03;
 	
-	@InjectView(R.id.btn_silent)
-	private Button btnSilent;
+	@InjectView(R.id.btn_profile04)
+	private Button btnProfile04;
 	
 	@InjectView(R.id.btn_stopTimer)
 	private ImageButton btnStopTimer;
@@ -82,7 +75,10 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	private TextView txtDisplayTimer;
 	
 	private Dialog timerDialog;
-	static final int ID_TIMEPICKER = 1;
+	static final int DIALOG_ID_TIMEPICKER = 1;
+	
+	private Dialog profileNameDialog;
+	static final int DIALOG_ID_PROFILE_NAME = 2;
 	
 	private String standardProfile ="";
 	private String selectedProfileForTimer="";
@@ -93,16 +89,21 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	
 	private DataHelper dh;
 	
+	private int activeProfileId;
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // init DB
+        this.dh = new DataHelper(this);
         
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         
         setContentView(R.layout.main);
         
         initButtonBackground();
-        
+    	
         // Anpassungen fuer die Oberflaeche
         adjustDisplayComponents();
         
@@ -111,95 +112,139 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         
         // Button longClick initilisieren
         initButtonListeners();
-        
-        // init DB
-        this.dh = new DataHelper(this);
-        
+
     }
 	
-	
 	private void initButtonListeners() {
-		btnRingAndVibrate.setOnLongClickListener(new View.OnLongClickListener() {
+		
+		btnProfile01.setText(dh.findProfileSettingById(1).profileName);
+		btnProfile02.setText(dh.findProfileSettingById(2).profileName);
+		btnProfile03.setText(dh.findProfileSettingById(3).profileName);
+		btnProfile04.setText(dh.findProfileSettingById(4).profileName);
+		
+        ActionItem addAction = new ActionItem();
+        addAction.setTitle(getString(R.string.textProfileEditName));
+        addAction.setIcon(getResources().getDrawable(R.drawable.ic_add));
+        ActionItem editProfileAction = new ActionItem();
+        editProfileAction.setTitle(getString(R.string.textProfileEditSetting));
+        editProfileAction.setIcon(getResources().getDrawable(R.drawable.ic_accept));
+        final QuickAction mQuickAction 	= new QuickAction(this);
+        mQuickAction.addActionItem(addAction);
+        mQuickAction.addActionItem(editProfileAction);
+        mQuickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+        	@Override
+            public void onItemClick(int pos) {
+        		if (pos == 0) { //Add item selected
+        			showDialog(DIALOG_ID_PROFILE_NAME);
+    			} else if (pos == 1) { //Accept item selected
+    				goToSettingsWithProfileId(activeProfileId);
+    			} 
+	    	}
+	    });
+        
+        btnProfile01.setOnLongClickListener(new OnLongClickListener() {
+        	@Override
+        	public boolean onLongClick(View v) {
+        		activeProfileId = 1;
+        		mQuickAction.show(v);
+        		return false;
+        	}
+        });
+        btnProfile02.setOnLongClickListener(new OnLongClickListener() {
+        	@Override
+        	public boolean onLongClick(View v) {
+        		activeProfileId = 2;
+        		mQuickAction.show(v);
+        		return false;
+        	}
+        });
+        btnProfile03.setOnLongClickListener(new OnLongClickListener() {
+        	@Override
+        	public boolean onLongClick(View v) {
+        		activeProfileId = 3;
+        		mQuickAction.show(v);
+        		return false;
+        	}
+        });
+        btnProfile04.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				// AUFRUF TIMER
-//				selectedProfileForTimer = RING_AND_VIBRATE;
-//				showDialog(ID_TIMEPICKER);
-//				// true if the event is been consumed
-//				return true;
-				// AUFRUF TIMER - ENDE
-				
-				
-				// NEU
-				ProfileSettings ps = new ProfileSettings();
-				
-//				dh.deleteAll();
-//				dh.insert(2,"Ein Name");
-//				List<ProfileSettings> selectAll = dh.selectAll();
-				
-				ProfileSettings findProfileSettingById = dh.findProfileSettingById(1);
-				if(findProfileSettingById==null || findProfileSettingById.id==0){
-					dh.insert(1, "myName", 10);
-				}
-				
-				Intent intent = new Intent();
-				intent.setClassName(getPackageName(), "de.pepping.android.ringtone.activity.MainSettingsActivity");
-				intent.putExtra("PROFILE_ID", 1);
-				// launch real activity depending on the configuration
-				try {
-					// start activity
-					startActivity(intent);
-				} catch (ActivityNotFoundException e) {
-					Log.e(TAG, "cannot dispatch launch request", e);
-					// this could only happen if installation went wrong and
-					// Manifest.xml was not applied
-					AlertDialog.Builder builder = new AlertDialog.Builder(RingToneActivity.this);
-					builder.setMessage(R.string.msg_reinstall_required).setNeutralButton(R.string.btn_close,
-							new android.content.DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int which) {
-									finish(); // finish this activity
-								}
-							}).create().show();
-				}
-				return true;
-			}
-		});
-		btnRingOnly.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				selectedProfileForTimer = RING_ONLY;
-				showDialog(ID_TIMEPICKER);
-				// true if the event is been consumed
-				return true;
-			}
-		});
-		btnVibrateOnly.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				selectedProfileForTimer = VIBRATE_ONLY;
-				showDialog(ID_TIMEPICKER);
-				// true if the event is been consumed
-				return true;
-			}
-		});
-		btnSilent.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				selectedProfileForTimer = SILENT;
-				showDialog(ID_TIMEPICKER);
-				// true if the event is been consumed
-				return true;
+				activeProfileId = 4;
+				mQuickAction.show(v);
+				return false;
 			}
 		});
 	}
 
+	private boolean goToSettingsWithProfileId(final int profileId) {
+		Intent intent = new Intent();
+		intent.setClassName(getPackageName(), "de.pepping.android.ringtone.activity.MainSettingsActivity");
+		intent.putExtra("PROFILE_ID", profileId);
+		// launch real activity depending on the configuration
+		try {
+			// start activity
+			startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			Log.e(TAG, "cannot dispatch launch request", e);
+			// this could only happen if installation went wrong and
+			// Manifest.xml was not applied
+			AlertDialog.Builder builder = new AlertDialog.Builder(RingToneActivity.this);
+			builder.setMessage(R.string.msg_reinstall_required).setNeutralButton(R.string.btn_close,
+					new android.content.DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							finish(); // finish this activity
+						}
+					}).create().show();
+		}
+		return true;
+	}
+	
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch(id){
-			case ID_TIMEPICKER:
+			case DIALOG_ID_PROFILE_NAME:
+					profileNameDialog= new Dialog(this);
+					profileNameDialog.setContentView(R.layout.dialog_profilename);
+					profileNameDialog.setTitle(R.string.textDialogProfileNameTitleText);
+					
+					Button buttonOKProfileName = (Button) profileNameDialog.findViewById(R.id.buttonOKProfileName);
+					buttonOKProfileName.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							EditText mInputText = (EditText) profileNameDialog.findViewById(R.id.dialogProfileName);
+							String newProfileName = mInputText.getText().toString();
+							dh.updateProfileName(activeProfileId, newProfileName);
+							if(activeProfileId==1){
+								btnProfile01.setText(newProfileName);
+							}else if(activeProfileId==2){
+								btnProfile02.setText(newProfileName);
+							}else if(activeProfileId==3){
+								btnProfile03.setText(newProfileName);
+							}else if(activeProfileId==4){
+								btnProfile04.setText(newProfileName);
+							}
+							profileNameDialog.cancel();
+						}
+					});
+					
+					EditText editText = (EditText)profileNameDialog.findViewById(R.id.dialogProfileName);
+					if(activeProfileId==1){
+						editText.setText(btnProfile01.getText());
+					}else if(activeProfileId==2){
+						editText.setText(btnProfile02.getText());
+					}else if(activeProfileId==3){
+						editText.setText(btnProfile03.getText());
+					}else if(activeProfileId==4){
+						editText.setText(btnProfile04.getText());
+					}
+										
+					return profileNameDialog;
+					
+			case DIALOG_ID_TIMEPICKER:
 					timerDialog = new Dialog(this);
-					timerDialog.setContentView(R.layout.timer_dialog);
+					timerDialog.setContentView(R.layout.dialog_timer);
 					timerDialog.setTitle(R.string.textDialogTimerTitleText);
+					
 					
 					Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 			        int height = display.getHeight(); 
@@ -297,18 +342,20 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	}
 	
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		if(R.id.btn_ringAndVibrate == v.getId() ){
-			getMenuInflater().inflate(R.menu.button_action_menu, menu);
-		}
-		super.onCreateContextMenu(menu, v, menuInfo);
-	}
-	
-	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		switch(item.getItemId()){
-		case R.id.btn_act_on_head:{
-			Toast.makeText(this, "Test", Toast.LENGTH_SHORT).show();
+		case R.id.btn_context_menu_edit_profile_name:{
+			showDialog(DIALOG_ID_PROFILE_NAME);
+			return true;
+		}
+		case R.id.btn_context_menu_edit_profile:{
+			goToSettingsWithProfileId(activeProfileId);
+			return true;
+		}
+		case R.id.btn_context_menu_edit_timer:{
+			// AUFRUF TIMER
+			selectedProfileForTimer = RING_AND_VIBRATE;
+			showDialog(DIALOG_ID_TIMEPICKER);
 			return true;
 		}
 		}
@@ -317,16 +364,20 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	}
 
 	private void initButtonBackground() {
-        
+		
+        final SharedPreferences pref = getPreferences(MODE_PRIVATE);
+    	activeProfileId = pref.getInt("activeProfileId", 1);
+    	
+        /*
         if(RingtoneUtil.isRingAndVibrate(mAudioManager)){
-        	btnRingAndVibrate.setBackgroundResource(R.drawable.btn_green);
+        	btnProfile01.setBackgroundResource(R.drawable.btn_green);
         }else{
-        	btnRingAndVibrate.setBackgroundResource(R.drawable.btn_blackwert);
+        	btnProfile01.setBackgroundResource(R.drawable.btn_blackwert);
         }
         if(RingtoneUtil.isRingOnly(mAudioManager)){
-        	btnRingOnly.setBackgroundResource(R.drawable.btn_green);
+        	btnProfile02.setBackgroundResource(R.drawable.btn_green);
         }else{
-        	btnRingOnly.setBackgroundResource(R.drawable.btn_blackwert);
+        	btnProfile02.setBackgroundResource(R.drawable.btn_blackwert);
         }
         if(RingtoneUtil.isVibrateOnly(mAudioManager)){
         	btnVibrateOnly.setBackgroundResource(R.drawable.btn_green);
@@ -338,13 +389,36 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         }else{
         	btnSilent.setBackgroundResource(R.drawable.btn_blackwert);
         }
-		if (RingtoneUtil.isAirPlaneModeEnabled(getContentResolver())) {
-			btnAirplane.setText(getString(R.string.textAirplaneOn));
-			btnAirplane.setBackgroundResource(R.drawable.btn_blue);
-		}else{
-			btnAirplane.setText(getString(R.string.textAirplaneOff));
-			btnAirplane.setBackgroundResource(R.drawable.btn_blackwert);
-		}
+        */
+        if(activeProfileId==1){
+        	btnProfile01.setBackgroundResource(R.drawable.btn_green);
+        }else{
+        	btnProfile01.setBackgroundResource(R.drawable.btn_blackwert);
+        }
+        if(activeProfileId==2){
+        	btnProfile02.setBackgroundResource(R.drawable.btn_green);
+        }else{
+        	btnProfile02.setBackgroundResource(R.drawable.btn_blackwert);
+        }
+        if(activeProfileId==3){
+        	btnProfile03.setBackgroundResource(R.drawable.btn_green);
+        }else{
+        	btnProfile03.setBackgroundResource(R.drawable.btn_blackwert);
+        }
+        if(activeProfileId==4){
+        	btnProfile04.setBackgroundResource(R.drawable.btn_green);
+        }else{
+        	btnProfile04.setBackgroundResource(R.drawable.btn_blackwert);
+        }
+        
+        // AirplaneMode wird besonders behandelt
+//		if (RingtoneUtil.isAirPlaneModeEnabled(getContentResolver())) {
+//			btnAirplane.setText(getString(R.string.textAirplaneOn));
+//			btnAirplane.setBackgroundResource(R.drawable.btn_blue);
+//		}else{
+//			btnAirplane.setText(getString(R.string.textAirplaneOff));
+//			btnAirplane.setBackgroundResource(R.drawable.btn_blackwert);
+//		}
         
 	}
 
@@ -438,15 +512,18 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 		if(endDate!=null){
 			stopTimerAndUpdateUi();
 		}
-		RingtoneUtil.setRingAndVibrate(mAudioManager);
+		int profile_id = activeProfileId = 1;
+		ProfileSettingUtil.setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textRingAndVibrateToast));
 	}
-	
+
+
 	public void onRingOnly(final View button){
 		if(endDate!=null){
 			stopTimerAndUpdateUi();
 		}
-		RingtoneUtil.setRingOnly(mAudioManager);
+		int profile_id = activeProfileId = 2;
+		ProfileSettingUtil.setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textRingOnlyToast));
 	}
 	
@@ -454,7 +531,8 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 		if(endDate!=null){
 			stopTimerAndUpdateUi();
 		}
-		RingtoneUtil.setVibrateOnly(mAudioManager);
+		int profile_id = activeProfileId = 3;
+		ProfileSettingUtil.setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textVibrateOnlyToast));
 	}
 	
@@ -462,7 +540,8 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 		if(endDate!=null){
 			stopTimerAndUpdateUi();
 		}
-		RingtoneUtil.setSilent(mAudioManager);
+		int profile_id = activeProfileId = 4;
+		ProfileSettingUtil.setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textSilentToast));
 	}
 	
@@ -496,6 +575,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     	}
     	editor.putString("selectedProfileForTimer", selectedProfileForTimer);
     	editor.putString("standardProfile", standardProfile);
+    	
     	editor.commit();
     	
     	super.onPause();
@@ -520,7 +600,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     		endDate = Calendar.getInstance();
     		endDate.setTimeInMillis(endDateAsLong);
     	}
-
+    	
     	displayTimerChanges();
    	
         super.onResume();
@@ -538,13 +618,13 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     	if(endDate!=null && endDate.after(calendar)){
     		if(standardProfile!=null){
     			if(standardProfile.equals(Constants.RING_AND_VIBRATE)){
-    				btnRingAndVibrate.setBackgroundResource(R.drawable.btn_grey);
+    				btnProfile01.setBackgroundResource(R.drawable.btn_grey);
     			}else if(standardProfile.equals(Constants.RING_ONLY)){
-    				btnRingOnly.setBackgroundResource(R.drawable.btn_grey);
+    				btnProfile02.setBackgroundResource(R.drawable.btn_grey);
     			}else if(standardProfile.equals(Constants.VIBRATE_ONLY)){
-    				btnVibrateOnly.setBackgroundResource(R.drawable.btn_grey);
+    				btnProfile03.setBackgroundResource(R.drawable.btn_grey);
 				} else if (standardProfile.equals(Constants.SILENT)) {
-					btnSilent.setBackgroundResource(R.drawable.btn_grey);
+					btnProfile04.setBackgroundResource(R.drawable.btn_grey);
 				}
     		}
     		btnStopTimer.setImageResource(R.drawable.timer_enabled);
@@ -555,7 +635,11 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     }
 	
 	private void exitApp(String endText){
-		
+
+    	final SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+    	editor.putInt("activeProfileId", activeProfileId);
+    	editor.commit();
+    	
     	boolean isSplashScreen  = getCustomPreferences().getBoolean(PREF_SPLASH_SCREEN, false);
     	boolean isExitApp  = getCustomPreferences().getBoolean(PREF_EXIT_APP, true);
     	if(isSplashScreen){
@@ -611,8 +695,6 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     	    int minutes = (int) (difference / (1000 * 60) % 60);
     	    int seconds = (int) (difference / 1000 % 60);
     	    txtDisplayTimer.setText("" + String.format("%02d",hours) + ":" +  String.format("%02d",minutes) + ":" +  String.format("%02d",seconds));
-    	    
-    		
 //			txtDisplayTimer.setText("" + hour + ":"+f.format(tmpDate));
     	}else{
     		mTimer.sendEmptyMessage(UpdateTimer.MSG_STOP);

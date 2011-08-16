@@ -54,12 +54,15 @@ public class AirplaneModeSettingHandler extends SettingHandler {
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         activity.registerReceiver(mReceiver, filter);
 		
+        mSetting.value = mActivity.mProfileSetting.airplane_mode;
+        setAirMode(mSetting.value==1);
 		// update state
 		updateState();
 	}
 
 	@Override
 	public void deactivate() {
+		mActivity.mProfileSetting.airplane_mode = mSetting.value;
 		mActivity.unregisterReceiver(mReceiver);
 	}
 
@@ -79,6 +82,7 @@ public class AirplaneModeSettingHandler extends SettingHandler {
 
 			if (noConfirm) {
 				setAirMode(true);
+				mSetting.value = 1;
 			} else {
 				AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
 				builder.setTitle(R.string.airmode_title)
@@ -87,6 +91,7 @@ public class AirplaneModeSettingHandler extends SettingHandler {
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
 						setAirMode(isSwitched);
+						mSetting.value = isSwitched?1:0;
 					}
 				}).setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
@@ -98,17 +103,25 @@ public class AirplaneModeSettingHandler extends SettingHandler {
 			
 		} else {
 			setAirMode(isSwitched);
+			mSetting.value = isSwitched?1:0;
 		}
 		
 	}
 
 	private void setAirMode(boolean enabled) {
-		// update setting
-		Settings.System.putInt(mActivity.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, enabled ? 1 : 0);
-		// notify change
-		Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-		intent.putExtra("state", enabled);
-		mActivity.sendBroadcast(intent);
+		if(mSetting.directSettingActivation){
+			// update setting
+			Settings.System.putInt(mActivity.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, enabled ? 1 : 0);
+			// notify change
+			Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+			intent.putExtra("state", enabled);
+			mActivity.sendBroadcast(intent);
+		}else{
+			Setting setting = mSetting;
+			setting.checked = enabled;
+			setting.descr = mActivity.getString(enabled ? R.string.txt_status_turned_on : R.string.txt_status_turned_off);
+			setting.updateView();
+		}
 	}
 	
 	@Override

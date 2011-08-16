@@ -2,8 +2,16 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/btn_act_on_head"
-        android:title="Auf dem Kopf"
+    <item android:id="@+id/btn_context_menu_edit_profile_name"
+        android:title="@string/textProfileEditName"
+        android:icon="@drawable/prefernces" />
+        
+    <item android:id="@+id/btn_context_menu_edit_profile"
+        android:title="@string/textProfileEditSetting"
+        android:icon="@drawable/prefernces" />
+        
+    <item android:id="@+id/btn_context_menu_edit_timer"
+        android:title="@string/textProfileEditTimer"
         android:icon="@drawable/prefernces" />
 
 </menu>

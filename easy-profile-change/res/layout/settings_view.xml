@@ -5,7 +5,17 @@
 	android:layout_height="fill_parent" 
 	android:background="@drawable/bitmap_background"
 	>
-
+	
+	<LinearLayout android:layout_marginTop="3dp" android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:orientation="horizontal">
+		<TextView android:id="@+id/profileName"
+				android:textColor="@android:color/white" android:gravity="center_horizontal"
+				android:textSize="20sp" android:singleLine="true"
+				android:layout_marginLeft="6dp" android:layout_height="fill_parent"
+				android:layout_width="fill_parent" 
+				android:text="TEST" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
+	</LinearLayout>
+	
 	<include layout="@layout/main_toolbar" />
 
 	<ScrollView android:layout_height="wrap_content"

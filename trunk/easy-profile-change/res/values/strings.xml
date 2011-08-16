@@ -20,6 +20,11 @@
 <string name="textAirplaneOffToast">Battery save - Airplane-Mode ON</string>
 <string name="textCloseActivityDialogTitle">Your new Profile</string>
 
+<!-- ContextMenu ProfileEdit -->
+<string name="textProfileEditName">Edit\nname</string>
+<string name="textProfileEditSetting">Edit\nprofil</string>
+<string name="textProfileEditTimer">Timer</string>
+
 <!-- TimerDialog -->
 <string name="textDialogTimerTitleText">Timer</string>
 <string name="textDialogTimerInfoText">Please select your minutes, or put in textbox below</string>
@@ -30,6 +35,10 @@
 <string name="textDialogTimer120Minute">120 Minutes</string>
 <string name="textDialogTimerCustomUnit">Minutes</string>
 
+<!-- ProfileNameDialog -->
+<string name="textDialogProfileNameTitleText">Profile Name</string>
+<string name="textDialogProfileNameInfoText">Please input your profilename</string>
+
 <string name="textTimerEndApp">Profile: %1$s for %2$s minutes</string>
 
 <!-- Preferences -->
@@ -39,6 +48,8 @@
 <string name="textPreferencesCategoryNameCommonSplashScreenSummary">SplashScreen at the End?</string>
 <string name="textPreferencesCategoryNameCommonExitAppTitle">Exit App after select Profile</string>
 <string name="textPreferencesCategoryNameCommonExitAppSummary">Exit App after select Profile?</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationTitle">Direct setting activation</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationSummary">Shoud the settings being activated immediately?</string>
 <string name="textPreferencesCategoryNameTimer">Timer - Preferences</string>
 <string name="textPreferencesCategoryNameTimerNotificationVibrateTitle">Notification Vibration</string>
 <string name="textPreferencesCategoryNameTimerNotificationVibrateSummary">Vibration to notify the profile has changed?</string>

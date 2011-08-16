@@ -47,13 +47,13 @@
 			android:textSize="12sp" android:singleLine="true"
 			android:layout_gravity="center" android:layout_height="25dp"
 			android:layout_width="40dp"/>
-		-->
 
 		<ImageButton android:id="@+id/flashlight"
 			android:background="@drawable/button_black" android:src="@drawable/ic_flashlight"
 			android:gravity="center" android:layout_marginRight="2px"
 			android:layout_gravity="center" android:layout_height="40dp"
 			android:layout_width="58dp" />
+		-->
 
 		<ImageButton android:id="@+id/battery" android:background="@drawable/button_black"
 			android:gravity="center" android:layout_gravity="center"

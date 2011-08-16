@@ -20,6 +20,11 @@
 <string name="textAirplaneOffToast">Akku schoned Kein Empfang</string>
 <string name="textCloseActivityDialogTitle">Dein neues Profile</string>
 
+<!-- ContextMenu ProfileEdit -->
+<string name="textProfileEditName">Ändere\nProfilname</string>
+<string name="textProfileEditSetting">Bearbeite\nProfile</string>
+<string name="textProfileEditTimer">Timer</string>
+
 <!-- TimerDialog -->
 <string name="textDialogTimerTitleText">Zeitintervall</string>
 <string name="textDialogTimerInfoText">Bitte Zeitintervall auswählen, oder eigenes Intervall eingeben!</string>
@@ -30,6 +35,10 @@
 <string name="textDialogTimer120Minute">120 Minuten</string>
 <string name="textDialogTimerCustomUnit">Minuten</string>
 
+<!-- ProfileNameDialog -->
+<string name="textDialogProfileNameTitleText">Profil Name</string>
+<string name="textDialogProfileNameInfoText">Bitte geben Sie einen neuen Profilnamen ein</string>
+
 <string name="textTimerEndApp">Profil: %1$s für %2$s Minuten</string>
 
 <!-- Preferences -->
@@ -39,6 +48,8 @@
 <string name="textPreferencesCategoryNameCommonSplashScreenSummary">Soll am Programmende ein SplashSreen gezeigt werden mit dem ausgewählten Profil?</string>
 <string name="textPreferencesCategoryNameCommonExitAppTitle">App beenden nach Profilwechsel</string>
 <string name="textPreferencesCategoryNameCommonExitAppSummary">Soll die App nach dem Profilwechsel beendet werden?</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationTitle">Aktivierung der Einstellung beim Profil bearbeiten</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationSummary">Soll die Einstellung bei der Profilbearbeitung direkt "scharf" gestellt werden?</string>
 <string name="textPreferencesCategoryNameTimer">Timer - Einstellungen</string>
 <string name="textPreferencesCategoryNameTimerNotificationVibrateTitle">Benachrichtung Vibration</string>
 <string name="textPreferencesCategoryNameTimerNotificationVibrateSummary">Vibration beim Wechsel auf das alte Profil?</string>

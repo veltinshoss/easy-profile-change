@@ -12,6 +12,11 @@
                         android:defaultValue="true"
                         android:summary="@string/textPreferencesCategoryNameCommonExitAppSummary"
                         android:key="prefExitApp" />
+                <CheckBoxPreference
+                        android:title="@string/textPreferencesCategoryNameCommonDirectSettingActivationTitle"
+                        android:defaultValue="false"
+                        android:summary="@string/textPreferencesCategoryNameCommonDirectSettingActivationSummary"
+                        android:key="prefDirectSettingActivation" />
         </PreferenceCategory>
         <PreferenceCategory
                 android:title="@string/textPreferencesCategoryNameTimer">

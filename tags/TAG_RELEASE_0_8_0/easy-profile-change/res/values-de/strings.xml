@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">Easy Profile Change</string>
+<color name="background">#FFFFFF</color>
+
+<color name="display_text_button">#FFFFFF</color>
+<string name="ringToneTitleText">Wähle dein Profil</string>
+<color name="Green">#47BA0D</color>
+<string name="textRingAndVibrate">Laut &amp; Vibrieren</string>
+<string name="textRingAndVibrateToast">Laut &amp;\nVibrieren</string>
+<string name="textRingOnly">Laut</string>
+<string name="textRingOnlyToast">Nur Laut</string>
+<string name="textVibrateOnly">Nur Vibrieren</string>
+<string name="textVibrateOnlyToast">Nur Vibirieren</string>
+<string name="textSilent">Lautlos</string>
+<string name="textSilentToast">Lautlos</string>
+<string name="textAirplaneOn">Airplane Ein\n(Akku schonend)</string>
+<string name="textAirplaneOff">Airplane Aus\n(Empfang ein)</string>
+<string name="textAirplaneOnToast">Empfang ein</string>
+<string name="textAirplaneOffToast">Akku schoned Kein Empfang</string>
+<string name="textCloseActivityDialogTitle">Dein neues Profile</string>
+
+<!-- ContextMenu ProfileEdit -->
+<string name="textProfileEditName">Ändere\nProfilname</string>
+<string name="textProfileEditSetting">Bearbeite\nProfile</string>
+<string name="textProfileEditTimer">Timer</string>
+
+<!-- TimerDialog -->
+<string name="textDialogTimerTitleText">Zeitintervall</string>
+<string name="textDialogTimerInfoText">Bitte Zeitintervall auswählen, oder eigenes Intervall eingeben!</string>
+<string name="textDialogTimer1Minute">1 Minute</string>
+<string name="textDialogTimer10Minute">10 Minuten</string>
+<string name="textDialogTimer30Minute">30 Minuten</string>
+<string name="textDialogTimer60Minute">60 Minuten</string>
+<string name="textDialogTimer120Minute">120 Minuten</string>
+<string name="textDialogTimerCustomUnit">Minuten</string>
+
+<!-- ProfileNameDialog -->
+<string name="textDialogProfileNameTitleText">Profil Name</string>
+<string name="textDialogProfileNameInfoText">Bitte geben Sie einen neuen Profilnamen ein</string>
+
+<string name="textTimerEndApp">Profil: %1$s für %2$s Minuten</string>
+
+<!-- Preferences -->
+<string name="textMenuPreferences">Einstellungen</string>
+<string name="textPreferencesCategoryNameCommon">Allgemeine - Einstellungen</string>
+<string name="textPreferencesCategoryNameCommonSplashScreenTitle">SplashScreen am Ende</string>
+<string name="textPreferencesCategoryNameCommonSplashScreenSummary">Soll am Programmende ein SplashSreen gezeigt werden mit dem ausgewählten Profil?</string>
+<string name="textPreferencesCategoryNameCommonExitAppTitle">App beenden nach Profilwechsel</string>
+<string name="textPreferencesCategoryNameCommonExitAppSummary">Soll die App nach dem Profilwechsel beendet werden?</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationTitle">Aktivierung der Einstellung beim Profil bearbeiten</string>
+<string name="textPreferencesCategoryNameCommonDirectSettingActivationSummary">Soll die Einstellung bei der Profilbearbeitung direkt "scharf" gestellt werden?</string>
+<string name="textPreferencesCategoryNameTimer">Timer - Einstellungen</string>
+<string name="textPreferencesCategoryNameTimerNotificationVibrateTitle">Benachrichtung Vibration</string>
+<string name="textPreferencesCategoryNameTimerNotificationVibrateSummary">Vibration beim Wechsel auf das alte Profil?</string>
+
+<!-- Instruction -->
+<string name="textDialogInstructionTitleText">Information - Timer</string>
+<string name="textDialogInstructionMainText">Hier gibt es Infos zu Easy Profile Change\n=================================\n* Um die Timerfunktionalität zu nutzen LANGE auf das temporäre Profil drücken! Anschließend entweder aus den vorgegebenen Zeiten auswählen oder Zeit manuell eingeben.</string>
+
+<color name="display_text_header">#000000</color>
+<color name="btnSelectedProfile">#26a979</color>
+</resources>

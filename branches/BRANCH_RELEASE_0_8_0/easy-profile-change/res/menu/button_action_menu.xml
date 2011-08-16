@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/btn_context_menu_edit_profile_name"
+        android:title="@string/textProfileEditName"
+        android:icon="@drawable/prefernces" />
+        
+    <item android:id="@+id/btn_context_menu_edit_profile"
+        android:title="@string/textProfileEditSetting"
+        android:icon="@drawable/prefernces" />
+        
+    <item android:id="@+id/btn_context_menu_edit_timer"
+        android:title="@string/textProfileEditTimer"
+        android:icon="@drawable/prefernces" />
+
+</menu>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+                android:title="@string/textPreferencesCategoryNameCommon">
+                <CheckBoxPreference
+                        android:title="@string/textPreferencesCategoryNameCommonSplashScreenTitle"
+                        android:defaultValue="false"
+                        android:summary="@string/textPreferencesCategoryNameCommonSplashScreenSummary"
+                        android:key="prefSplahScreen" />
+                <CheckBoxPreference
+                        android:title="@string/textPreferencesCategoryNameCommonExitAppTitle"
+                        android:defaultValue="true"
+                        android:summary="@string/textPreferencesCategoryNameCommonExitAppSummary"
+                        android:key="prefExitApp" />
+                <CheckBoxPreference
+                        android:title="@string/textPreferencesCategoryNameCommonDirectSettingActivationTitle"
+                        android:defaultValue="false"
+                        android:summary="@string/textPreferencesCategoryNameCommonDirectSettingActivationSummary"
+                        android:key="prefDirectSettingActivation" />
+        </PreferenceCategory>
+        <PreferenceCategory
+                android:title="@string/textPreferencesCategoryNameTimer">
+                <CheckBoxPreference
+                        android:title="@string/textPreferencesCategoryNameTimerNotificationVibrateTitle"
+                        android:defaultValue="false"
+                        android:summary="@string/textPreferencesCategoryNameTimerNotificationVibrateSummary"
+                        android:key="prefNotificationVibrate" />
+        </PreferenceCategory>
+</PreferenceScreen>

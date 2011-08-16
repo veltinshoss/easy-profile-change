@@ -121,15 +121,15 @@ public class MainSettingsActivity extends Activity implements OnClickListener, O
 		View battery = findViewById(R.id.battery);
 		battery.setOnClickListener(this);
 
-		mFlashlight = (ImageButton) findViewById(R.id.flashlight);
-		mFlashlight.setOnClickListener(this);
+//		mFlashlight = (ImageButton) findViewById(R.id.flashlight);
+//		mFlashlight.setOnClickListener(this);
 
 		this.dh = new DataHelper(this);
 		
 		// Die Id aus dem Intent holen
 		int profileId = getIntent().getExtras().getInt("PROFILE_ID");
-//		int profileId = savedInstanceState.getInt("PROFILE_ID");
 		mProfileSetting = dh.findProfileSettingById(profileId);
+		((TextView)findViewById(R.id.profileName)).setText(mProfileSetting.profileName);
 		
 		mLayout = new ListSettingsLayout(findViewById(R.id.settings_list), app);
 	}
@@ -142,10 +142,13 @@ public class MainSettingsActivity extends Activity implements OnClickListener, O
 
 		Iterator<Setting> settings = mApp.getSettings().iterator();
 		settings.next(); // jump one a "visible" group
-
+        
+		boolean directSettingActivation = getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE).getBoolean(Constants.PREF_DIRECT_SETTING_ACTIVATION, false);
+    	
 		while (settings.hasNext()) {
 			final Setting setting = settings.next();
 			final int id = setting.id;
+			setting.directSettingActivation = directSettingActivation;
 			SettingHandler handler = setting.getAssignedHandler();
 
 			if (handler == null) {
@@ -264,9 +267,7 @@ public class MainSettingsActivity extends Activity implements OnClickListener, O
 		// deactivate setting handlers
 		final ArrayList<Setting> settings = mApp.getSettings();
 		final int length = settings.size();
-		final ProfileSettings ps = new ProfileSettings();
-		ps.profileName="Default";
-		
+
 		for (int i = 1; i < length; i++) { // jump over first group setting
 
 			final Setting setting = settings.get(i);
@@ -276,25 +277,14 @@ public class MainSettingsActivity extends Activity implements OnClickListener, O
 
 			try {
 				setting.getAssignedHandler().deactivate();
-				if (id == Setting.BRIGHTNESS){
-					RangeSetting mSetting = (RangeSetting) setting;
-					ps.brightness = mSetting.value;
-				}
 			} catch (Exception e) {
 				Log.w(TAG, e);
 			}
 			// Log.d(TAG, "deactivate: " + id);
 		}
 		
-		// insert
-//		dh.insert(1, ps.profileName, ps.brightness);
-//		ProfileSettings findProfileSettingById = dh.findProfileSettingById(1);
-//		Log.d("TAG1","!!!!!!!!!!!!!!!!!!!!:" + findProfileSettingById.id + " und " + findProfileSettingById.brightness);
-		
 		// update
-		dh.update(mProfileSetting.id, mProfileSetting.profileName, mProfileSetting.brightness);
-//		ProfileSettings findProfileSettingById = dh.findProfileSettingById(1);
-//		Log.d("TAG1","!!!!!!!!!!!!!!!!!!!!:" + findProfileSettingById.id + " und " + findProfileSettingById.brightness);
+		dh.update(mProfileSetting);
 		
 		// dismiss initialization dialog
 		if (mInitializingDialog != null) {
@@ -395,7 +385,6 @@ public class MainSettingsActivity extends Activity implements OnClickListener, O
 //					if (LedFlashlightReceiver.ACTION_FLASHLIGHT.equals(intent.getAction())) {
 					if (false) {
 						updateFlashlightView();
-
 					} else {
 
 						// read battery status

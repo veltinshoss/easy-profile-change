@@ -19,7 +19,6 @@ package de.pepping.android.ringtone.fwk;
 
 public class RangeSetting extends Setting {
 
-	public int value;
 	public int max;
 	public int min;
 	public int minIconId;

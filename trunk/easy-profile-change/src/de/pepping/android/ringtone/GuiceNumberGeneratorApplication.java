@@ -40,22 +40,22 @@ public class GuiceNumberGeneratorApplication extends GuiceApplication {
 		/* visible */
 		Setting.GROUP_VISIBLE,
 		Setting.BRIGHTNESS,
-//		Setting.RINGER,
-//		Setting.VOLUME,
-//		Setting.BLUETOOTH,
-//		Setting.WIFI,
+		Setting.RINGER,
+		Setting.VOLUME,
+		Setting.BLUETOOTH,
+		Setting.WIFI,
+		Setting.SCREEN_TIMEOUT,
+		Setting.AIRPLANE_MODE,
+		Setting.AUTO_ROTATE,
+		
+//		/* hidden */
+		Setting.GROUP_HIDDEN,
 //		Setting.GPS,
 //		Setting.MOBILE_DATA,
 //		Setting.FOUR_G,
-//		
-//		/* hidden */
-		Setting.GROUP_HIDDEN,
 //		Setting.MASTER_VOLUME,
-//		Setting.SCREEN_TIMEOUT,
 //		Setting.WIFI_HOTSPOT,
-//		Setting.AIRPLANE_MODE,
 //		Setting.AUTO_SYNC,
-//		Setting.AUTO_ROTATE,
 //		Setting.LOCK_PATTERN,
 //		Setting.MOBILE_DATA_APN
 };

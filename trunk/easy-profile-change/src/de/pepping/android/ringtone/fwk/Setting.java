@@ -16,6 +16,8 @@
 
 package de.pepping.android.ringtone.fwk;
 
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -68,6 +70,9 @@ public class Setting {
 	public boolean enabled;
 	public boolean checked;
 	public boolean hasPopup;
+	public int value;
+	public HashMap<String, Integer> valueList;
+	public boolean directSettingActivation;
 	
 	/* preferences activity name or null if none */
 	public Class<?> prefs;

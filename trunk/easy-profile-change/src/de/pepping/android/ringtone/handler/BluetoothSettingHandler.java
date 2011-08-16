@@ -16,8 +16,6 @@
 
 package de.pepping.android.ringtone.handler;
 
-import static de.pepping.android.ringtone.Constants.TAG;
-
 import java.lang.reflect.Method;
 
 import android.bluetooth.BluetoothAdapter;
@@ -27,24 +25,27 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.provider.Settings;
 import android.util.Log;
+import de.pepping.android.ringtone.Constants;
 import de.pepping.android.ringtone.R;
 import de.pepping.android.ringtone.activity.MainSettingsActivity;
 import de.pepping.android.ringtone.fwk.Setting;
 import de.pepping.android.ringtone.fwk.SettingHandler;
+import de.pepping.android.ringtone.handler.bluetooth.BluetoothControl;
 
 
 
-public class BluetoothSettingHandler extends SettingHandler {
+public class BluetoothSettingHandler extends SettingHandler implements Constants{
 
-	public static String BLUETOOTH_ACTION_STATE_CHANGED;
-	public static String BLUETOOTH_EXTRA_STATE;
+    public static int BLUETOOTH_STATE_UNKNOWN = 0;
+    public static int BLUETOOTH_STATE_OFF= 0;
+    public static int BLUETOOTH_STATE_TURNING_ON= 0;
+    public static int BLUETOOTH_STATE_ON= 0;
+    public static int BLUETOOTH_STATE_TURNING_OFF= 0;
+    
+	public static String BLUETOOTH_ACTION_STATE_CHANGED = "0";
+	public static String BLUETOOTH_EXTRA_STATE= "0";
 	
-	// BT state abstraction
-    public static int BLUETOOTH_STATE_UNKNOWN;
-    public static int BLUETOOTH_STATE_OFF;
-    public static int BLUETOOTH_STATE_TURNING_ON;
-    public static int BLUETOOTH_STATE_ON;
-    public static int BLUETOOTH_STATE_TURNING_OFF;
+
 	
     class BluetoothStateReceiver extends BroadcastReceiver {
 		@Override
@@ -54,13 +55,7 @@ public class BluetoothSettingHandler extends SettingHandler {
 		}
 	}
 	
-    interface BluetoothControl {
-    	void setEnabled(boolean enabled);
-    	int getBluetoothState();
-    }
-    
-    
-    class BluetoothControl20 implements BluetoothControl {
+    public class BluetoothControl20 implements BluetoothControl {
 
     	private BluetoothAdapter mAdapter;
     	
@@ -86,16 +81,21 @@ public class BluetoothSettingHandler extends SettingHandler {
 		}
 
 		public void setEnabled(boolean enabled) {
-			if (enabled) {
-				mAdapter.enable();
-			} else {
-				mAdapter.disable();
+			if(mSetting.directSettingActivation){
+				if (enabled) {
+					mAdapter.enable();
+				} else {
+					mAdapter.disable();
+				}
+			}else{
+				onBluetoothStateChanged(enabled?BLUETOOTH_STATE_ON:BLUETOOTH_STATE_OFF);
 			}
+			mSetting.value = enabled?1:0;
 		}
     }
     
     
-	class BluetoothControl16 implements BluetoothControl {
+	public class BluetoothControl16 implements BluetoothControl {
 		
 		private Object mService;
 		private Method[] mMethods = new Method[3]; // [0] enable, [1] disable, [2] getBluetoothState
@@ -133,13 +133,18 @@ public class BluetoothSettingHandler extends SettingHandler {
 		}
 		
 		public void setEnabled(boolean enabled) {
-			try {
-				Method method = mMethods[enabled ? 0 : 1];
-				method.invoke(mService);
-				return;
-			} catch (Exception e) {
-				Log.e(TAG, "cannot enable/disable bluetooth", e);
+			if(mSetting.directSettingActivation){
+				try {
+					Method method = mMethods[enabled ? 0 : 1];
+					method.invoke(mService);
+					return;
+				} catch (Exception e) {
+					Log.e(TAG, "cannot enable/disable bluetooth", e);
+				}
+			}else{
+				onBluetoothStateChanged(enabled?BLUETOOTH_STATE_ON:BLUETOOTH_STATE_OFF);
 			}
+			mSetting.value = enabled?1:0;
 			return;
 		}
 		
@@ -171,20 +176,33 @@ public class BluetoothSettingHandler extends SettingHandler {
 			// try with 1.6
 			mBluetoothControl = new BluetoothControl16();
 		} catch(Exception e) {
-			mBluetoothControl = new BluetoothControl20(); // 2.0+ adapter
+			try {
+				mBluetoothControl = new BluetoothControl20(); // 2.0+ adapter
+			} catch(Exception e1) {
+				throw new Exception("No Bluetooth-Adapter");
+			}
 		}
 		
-        // get state pro-actively, as we won't be notified immediately
-        onBluetoothStateChanged(mBluetoothControl.getBluetoothState());
-
-        // register bluetooth event receiver
-        IntentFilter filter = new IntentFilter(BLUETOOTH_ACTION_STATE_CHANGED);
-        if (mReceiver == null) mReceiver = new BluetoothStateReceiver();
-        activity.registerReceiver(mReceiver, filter);
+		mSetting.value = activity.mProfileSetting.bluetooth;
+		
+		if(mSetting.directSettingActivation){
+			mBluetoothControl.setEnabled(mSetting.value==1);
+			// get state pro-actively, as we won't be notified immediately
+			onBluetoothStateChanged(mBluetoothControl.getBluetoothState());
+			
+			// register bluetooth event receiver
+			IntentFilter filter = new IntentFilter(BLUETOOTH_ACTION_STATE_CHANGED);
+			if (mReceiver == null) mReceiver = new BluetoothStateReceiver();
+			activity.registerReceiver(mReceiver, filter);
+		}else{
+			onBluetoothStateChanged(mSetting.value==1?BLUETOOTH_STATE_ON:BLUETOOTH_STATE_OFF);
+		}
+		
 	}
 
 	@Override
 	public void deactivate() {
+		mActivity.mProfileSetting.bluetooth = mSetting.value;
 		mActivity.unregisterReceiver(mReceiver);
 	}
 
@@ -197,6 +215,7 @@ public class BluetoothSettingHandler extends SettingHandler {
 
 	@Override
 	public void onSwitched(boolean isSwitched) {
+		mSetting.value = isSwitched?1:0;
 		mBluetoothControl.setEnabled(isSwitched);
 	}
 

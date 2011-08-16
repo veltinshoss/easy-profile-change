@@ -40,6 +40,7 @@ public class BrightnessSettingHandler extends SettingHandler implements OnClickL
 
 	private static final int MINIMUM_BACKLIGHT = 18;
 	private static final int MAXIMUM_BACKLIGHT = 255;
+	private static final int AUTO_BRIGHTNESS = 0;
 	private static final int RANGE = MAXIMUM_BACKLIGHT - MINIMUM_BACKLIGHT;
 
     public static final String MODE_KEY = "screen_brightness_mode";
@@ -81,7 +82,8 @@ public class BrightnessSettingHandler extends SettingHandler implements OnClickL
 		
 		// get values
 		ContentResolver resolver = activity.getContentResolver();
-		final int mode = Settings.System.getInt(resolver, MODE_KEY, MODE_UNSUPPORTED);
+//		final int mode = Settings.System.getInt(resolver, MODE_KEY, MODE_UNSUPPORTED);
+		final int mode = activity.mProfileSetting.brightness_mode;
 //		final int value = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS, 0);
 		final int value = activity.mProfileSetting.brightness;
 		final boolean auto = mode == MODE_AUTO;
@@ -107,6 +109,7 @@ public class BrightnessSettingHandler extends SettingHandler implements OnClickL
 		
 		final int value = getPropertyValue(((RangeSetting)mSetting).value);
 		mActivity.mProfileSetting.brightness = value;
+		mActivity.mProfileSetting.brightness_mode = ((RangeSetting)mSetting).checked?1:0;
 		
 	}
 
@@ -134,7 +137,6 @@ public class BrightnessSettingHandler extends SettingHandler implements OnClickL
 							R.string.btn_yes, this).setNegativeButton(R.string.btn_no, this).create().show();
 	
 				} else {
-	
 					// workaround for stop tracking
 					updateSystemBrightness();
 				}
@@ -155,12 +157,15 @@ public class BrightnessSettingHandler extends SettingHandler implements OnClickL
 		// update setting and view
 		RangeSetting setting = (RangeSetting) mSetting;
 		setting.checked = switched;
+		mSetting.checked = switched;
 		setting.descr = switched ? activity.getString(R.string.txt_autobrightness_enabled) : null;
 		
 		if (!switched) {
 			// refresh value
 			final int value = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS, 0);
 			setting.value = getPercentValue(value);
+		}else{
+			
 		}
 		
 		setting.updateView();

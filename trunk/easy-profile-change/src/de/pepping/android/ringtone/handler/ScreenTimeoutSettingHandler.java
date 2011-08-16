@@ -48,7 +48,9 @@ public class ScreenTimeoutSettingHandler extends SettingHandler implements OnIte
 	@Override
 	public void activate(MainSettingsActivity activity) {
 		mActivity = activity;
-		int timeout = mTimeout = getCurrentTimeout();
+//		int timeout = mTimeout = getCurrentTimeout();
+		mSetting.value = mActivity.mProfileSetting.screen_timeout;
+		int timeout = mSetting.value;
 		updateUIByValue(timeout);
 		
 		// we should not remember 0 if timeout is off
@@ -58,6 +60,7 @@ public class ScreenTimeoutSettingHandler extends SettingHandler implements OnIte
 
 	@Override
 	public void deactivate() {
+		mActivity.mProfileSetting.screen_timeout = mSetting.value ;
 		if (mDialog != null) {
 			mDialog.dismiss();
 			mDialog = null;
@@ -167,6 +170,7 @@ public class ScreenTimeoutSettingHandler extends SettingHandler implements OnIte
 	}
 	
 	private void setTimeout(int timeout) {
+		mSetting.value = timeout;
 		Settings.System.putInt(mActivity.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, timeout);
 		//Log.d(TAG, "timeout updated: " + timeout + " ms");
 	}

@@ -22,6 +22,8 @@
 	        android:layout_height="wrap_content"
 	        android:layout_marginLeft="10px"
 	        android:orientation="vertical"
+	        android:saveEnabled="false"
+	        
 	        >
 	        <RadioButton
 	            android:text="@string/textDialogTimer1Minute"
@@ -32,6 +34,7 @@
 	            android:text="@string/textDialogTimer10Minute"
 	            android:id="@+id/dialogTimer10minute" 
 	            android:paddingLeft="70px"
+	            android:checked="true"
 	            />
 	        <RadioButton
 	            android:text="@string/textDialogTimer30Minute"

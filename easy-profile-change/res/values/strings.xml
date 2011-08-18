@@ -23,7 +23,7 @@
 <!-- ContextMenu ProfileEdit -->
 <string name="textProfileEditName">Edit\nname</string>
 <string name="textProfileEditSetting">Edit\nprofil</string>
-<string name="textProfileEditTimer">Timer</string>
+<string name="textProfileEditTimer">Timer\n</string>
 
 <!-- TimerDialog -->
 <string name="textDialogTimerTitleText">Timer</string>

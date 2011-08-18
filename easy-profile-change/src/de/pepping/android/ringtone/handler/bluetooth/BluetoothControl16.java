@@ -4,7 +4,7 @@ import static de.pepping.android.ringtone.Constants.TAG;
 
 import java.lang.reflect.Method;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 public class BluetoothControl16 implements BluetoothControl {
@@ -21,7 +21,7 @@ public class BluetoothControl16 implements BluetoothControl {
 	private Object mService;
 	private Method[] mMethods = new Method[3]; // [0] enable, [1] disable, [2] getBluetoothState
 	
-	public BluetoothControl16(Activity mActivity) throws Exception {
+	public BluetoothControl16(Context mActivity) throws Exception {
 		mService = mActivity.getSystemService("bluetooth"); // bluetooth
 		Method[] methods = mMethods;
 		

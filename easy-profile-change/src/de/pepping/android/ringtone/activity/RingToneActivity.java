@@ -91,6 +91,8 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	
 	private int activeProfileId;
 	
+	private int oldProfileId;
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +103,9 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         
         setContentView(R.layout.main);
+        
+        final SharedPreferences pref =  getCustomPreferences();
+        activeProfileId = pref.getInt("activeProfileId", 1);
         
         initButtonBackground();
     	
@@ -128,9 +133,13 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         ActionItem editProfileAction = new ActionItem();
         editProfileAction.setTitle(getString(R.string.textProfileEditSetting));
         editProfileAction.setIcon(getResources().getDrawable(R.drawable.ic_accept));
+        ActionItem timerAction = new ActionItem();
+        timerAction.setTitle(getString(R.string.textProfileEditTimer));
+        timerAction.setIcon(getResources().getDrawable(R.drawable.ic_accept));
         final QuickAction mQuickAction 	= new QuickAction(this);
         mQuickAction.addActionItem(addAction);
         mQuickAction.addActionItem(editProfileAction);
+        mQuickAction.addActionItem(timerAction);
         mQuickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
         	@Override
             public void onItemClick(int pos) {
@@ -138,13 +147,16 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         			showDialog(DIALOG_ID_PROFILE_NAME);
     			} else if (pos == 1) { //Accept item selected
     				goToSettingsWithProfileId(activeProfileId);
-    			} 
+	        	} else if (pos == 2) { //Accept item selected
+	        		showDialog(DIALOG_ID_TIMEPICKER);
+	        	} 
 	    	}
 	    });
         
         btnProfile01.setOnLongClickListener(new OnLongClickListener() {
         	@Override
         	public boolean onLongClick(View v) {
+        		oldProfileId = activeProfileId;
         		activeProfileId = 1;
         		mQuickAction.show(v);
         		return false;
@@ -153,6 +165,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         btnProfile02.setOnLongClickListener(new OnLongClickListener() {
         	@Override
         	public boolean onLongClick(View v) {
+        		oldProfileId = activeProfileId;
         		activeProfileId = 2;
         		mQuickAction.show(v);
         		return false;
@@ -161,6 +174,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         btnProfile03.setOnLongClickListener(new OnLongClickListener() {
         	@Override
         	public boolean onLongClick(View v) {
+        		oldProfileId = activeProfileId;
         		activeProfileId = 3;
         		mQuickAction.show(v);
         		return false;
@@ -169,6 +183,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
         btnProfile04.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
+				oldProfileId = activeProfileId;
 				activeProfileId = 4;
 				mQuickAction.show(v);
 				return false;
@@ -200,12 +215,28 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	}
 	
 	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		super.onPrepareDialog(id, dialog);
+		switch(id){
+			case DIALOG_ID_TIMEPICKER:
+				RadioGroup radioGroup =  (RadioGroup) timerDialog.findViewById(R.id.dialogTimerRadiogroup);
+				radioGroup.clearCheck();
+//				int childCount = radioGroup.getChildCount();
+//				for(int i=0 ;i<childCount;i++){
+//					RadioButton row  = (RadioButton) radioGroup.getChildAt(i);
+//					row.setSelected(false);
+//				}
+		}
+	}
+	
 	protected Dialog onCreateDialog(int id) {
 		switch(id){
 			case DIALOG_ID_PROFILE_NAME:
 					profileNameDialog= new Dialog(this);
 					profileNameDialog.setContentView(R.layout.dialog_profilename);
 					profileNameDialog.setTitle(R.string.textDialogProfileNameTitleText);
+					
+					profileNameDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
 					
 					Button buttonOKProfileName = (Button) profileNameDialog.findViewById(R.id.buttonOKProfileName);
 					buttonOKProfileName.setOnClickListener(new View.OnClickListener() {
@@ -248,9 +279,9 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 					
 					Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 			        int height = display.getHeight(); 
+			        RadioGroup radioGroup =  (RadioGroup) timerDialog.findViewById(R.id.dialogTimerRadiogroup);
+			        int childCount = radioGroup.getChildCount();
 			        if(height <500){
-			        	RadioGroup radioGroup =  (RadioGroup) timerDialog.findViewById(R.id.dialogTimerRadiogroup);
-			        	int childCount = radioGroup.getChildCount();
 			        	for(int i=0 ;i<childCount;i++){
 			        		RadioButton row  = (RadioButton) radioGroup.getChildAt(i);
 			            	row.setPadding(50, 0, 0, 0);
@@ -290,7 +321,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 							
 							String minutes = "";
 							if(checkedId==R.id.dialogTimer1minute){
-								calendar.add(Calendar.SECOND, 60);
+								calendar.add(Calendar.SECOND, 6);
 								minutes = "1";
 							}else if(checkedId==R.id.dialogTimer10minute){
 								calendar.add(Calendar.SECOND, (60*10));
@@ -309,7 +340,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 								minutes = "15";								
 							}
 							
-							if(calendar!=null && minutes!=null){
+							if(calendar!=null && minutes!=null && checkedId!=-1){
 								executeTimerDialogChoice(calendar,minutes);	
 							}
 						}
@@ -321,9 +352,10 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	}
 	
 	private void executeTimerDialogChoice(Calendar endDateNew, String minutes){
-		standardProfile = RingtoneUtil.getRingToneAsString(mAudioManager);
+		
+//		standardProfile = RingtoneUtil.getRingToneAsString(mAudioManager);
 		Intent intent = new Intent(RingToneActivity.this, TimerService.class);
-		intent.putExtra(INTENT_PARAM_PROFILE, standardProfile);
+		intent.putExtra(INTENT_PARAM_PROFILE, oldProfileId);
 		PendingIntent mSender = PendingIntent.getBroadcast(RingToneActivity.this,0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(System.currentTimeMillis());
@@ -337,8 +369,11 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 		AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
 		am.set(AlarmManager.RTC_WAKEUP, endDateNew.getTimeInMillis(), mSender);
 		timerDialog.cancel();
-		RingtoneUtil.setRingToneWithString(selectedProfileForTimer, mAudioManager);
+		
+		// das temporaere Profil wird gesetzt 
+		new ProfileSettingUtil().setProfileById(activeProfileId, this, dh);
 		exitApp(text);
+		
 	}
 	
 	@Override
@@ -365,31 +400,6 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 
 	private void initButtonBackground() {
 		
-        final SharedPreferences pref = getPreferences(MODE_PRIVATE);
-    	activeProfileId = pref.getInt("activeProfileId", 1);
-    	
-        /*
-        if(RingtoneUtil.isRingAndVibrate(mAudioManager)){
-        	btnProfile01.setBackgroundResource(R.drawable.btn_green);
-        }else{
-        	btnProfile01.setBackgroundResource(R.drawable.btn_blackwert);
-        }
-        if(RingtoneUtil.isRingOnly(mAudioManager)){
-        	btnProfile02.setBackgroundResource(R.drawable.btn_green);
-        }else{
-        	btnProfile02.setBackgroundResource(R.drawable.btn_blackwert);
-        }
-        if(RingtoneUtil.isVibrateOnly(mAudioManager)){
-        	btnVibrateOnly.setBackgroundResource(R.drawable.btn_green);
-        }else{
-        	btnVibrateOnly.setBackgroundResource(R.drawable.btn_blackwert);
-        }
-        if(RingtoneUtil.isSilent(mAudioManager)){
-        	btnSilent.setBackgroundResource(R.drawable.btn_green);
-        }else{
-        	btnSilent.setBackgroundResource(R.drawable.btn_blackwert);
-        }
-        */
         if(activeProfileId==1){
         	btnProfile01.setBackgroundResource(R.drawable.btn_green);
         }else{
@@ -460,7 +470,8 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 
 	public void onStopTimer(final View button){
 		if(endDate!=null){
-			RingtoneUtil.setRingToneWithString(standardProfile, mAudioManager);
+			activeProfileId = oldProfileId;
+			new ProfileSettingUtil().setProfileById(activeProfileId, this, dh);
 			stopTimerAndUpdateUi();
 		}else{
 			Dialog dialog = null;
@@ -513,7 +524,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 			stopTimerAndUpdateUi();
 		}
 		int profile_id = activeProfileId = 1;
-		ProfileSettingUtil.setProfileById(profile_id, this, dh);
+		new ProfileSettingUtil().setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textRingAndVibrateToast));
 	}
 
@@ -523,7 +534,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 			stopTimerAndUpdateUi();
 		}
 		int profile_id = activeProfileId = 2;
-		ProfileSettingUtil.setProfileById(profile_id, this, dh);
+		new ProfileSettingUtil().setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textRingOnlyToast));
 	}
 	
@@ -532,7 +543,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 			stopTimerAndUpdateUi();
 		}
 		int profile_id = activeProfileId = 3;
-		ProfileSettingUtil.setProfileById(profile_id, this, dh);
+		new ProfileSettingUtil().setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textVibrateOnlyToast));
 	}
 	
@@ -541,7 +552,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 			stopTimerAndUpdateUi();
 		}
 		int profile_id = activeProfileId = 4;
-		ProfileSettingUtil.setProfileById(profile_id, this, dh);
+		new ProfileSettingUtil().setProfileById(profile_id, this, dh);
 		exitApp(getString(R.string.textSilentToast));
 	}
 	
@@ -626,6 +637,15 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 				} else if (standardProfile.equals(Constants.SILENT)) {
 					btnProfile04.setBackgroundResource(R.drawable.btn_grey);
 				}
+//    			if(activeProfileId==1){
+//    				btnProfile01.setBackgroundResource(R.drawable.btn_grey);
+//    			}else if(activeProfileId==2){
+//    				btnProfile02.setBackgroundResource(R.drawable.btn_grey);
+//    			}else if(activeProfileId==3){
+//    				btnProfile03.setBackgroundResource(R.drawable.btn_grey);
+//    			} else if (activeProfileId==4) {
+//    				btnProfile04.setBackgroundResource(R.drawable.btn_grey);
+//    			}
     		}
     		btnStopTimer.setImageResource(R.drawable.timer_enabled);
     		btnStopTimer.setClickable(true);
@@ -636,7 +656,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
 	
 	private void exitApp(String endText){
 
-    	final SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+    	final SharedPreferences.Editor editor = getCustomPreferences().edit();
     	editor.putInt("activeProfileId", activeProfileId);
     	editor.commit();
     	
@@ -644,7 +664,7 @@ public class RingToneActivity extends GuiceActivity implements Constants{
     	boolean isExitApp  = getCustomPreferences().getBoolean(PREF_EXIT_APP, true);
     	if(isSplashScreen){
     		Intent intent = new Intent("de.pepping.android.ringtone.intent.action.CLOSE_ACTIVITY");
-    		intent.putExtra(CloseActivity.KEY_TEXT_TO_SHOW, endText);
+    		intent.putExtra(CloseActivity.KEY_TEXT_TO_SHOW, dh.findProfileSettingById(activeProfileId).profileName);
     		startActivity(intent);
     	}
     	if(isExitApp){

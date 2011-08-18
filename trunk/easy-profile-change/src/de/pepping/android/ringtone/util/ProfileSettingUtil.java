@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
@@ -18,9 +20,15 @@ import de.pepping.android.ringtone.handler.bluetooth.BluetoothControl20;
 
 public class ProfileSettingUtil {
 	
-	public static void setProfileById(int profileId, Activity activity, DataHelper data ){
+	private Activity mActivity = null;
+	private int mBrigthness;
+	private static final int UPDATE_TIMEOUT = 45;
+	 
+	public void setProfileById(int profileId, Activity activity, DataHelper data ){
+		mActivity = activity;
 		final ProfileSettings newProfile = data.findProfileSettingById(profileId);
 		setSystemBrightness(activity ,newProfile.brightness);
+		mBrigthness = newProfile.brightness;
 		setRinger(activity ,newProfile.ringer_mode);
 		setVolumen(activity ,newProfile);
 		setBluetooth(activity ,newProfile);
@@ -28,14 +36,13 @@ public class ProfileSettingUtil {
 		setScreenTimeout(activity ,newProfile);
 		setAirplaneMode(activity ,newProfile);
 		setAutoRotation(activity ,newProfile);
-		
 	}
 	
-	private static void setAutoRotation(Activity activity,ProfileSettings newProfile) {
+	private static void setAutoRotation(Context activity,ProfileSettings newProfile) {
 		Settings.System.putInt(activity.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, newProfile.auto_rotation);
 	}
 
-	private static void setAirplaneMode(Activity activity,
+	private static void setAirplaneMode(Context activity,
 			ProfileSettings newProfile) {
 		// update setting
 		Settings.System.putInt(activity.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, newProfile.airplane_mode==1 ? 1 : 0);
@@ -46,13 +53,13 @@ public class ProfileSettingUtil {
 		
 	}
 
-	private static void setScreenTimeout(Activity activity,
+	private static void setScreenTimeout(Context activity,
 			ProfileSettings newProfile) {
 		Settings.System.putInt(activity.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, newProfile.screen_timeout);
 		
 	}
 
-	private static void setWifi(Activity activity, ProfileSettings newProfile) {
+	private static void setWifi(Context activity, ProfileSettings newProfile) {
 		
 		if (newProfile.wifi==1 && Integer.parseInt(Build.VERSION.SDK) >= 8) {
 			WifiApManager wifiApManager = new WifiApManager(activity);
@@ -65,14 +72,14 @@ public class ProfileSettingUtil {
 		
 	}
 	
-	private static WifiManager getWiFiManager(Activity activity) {
+	private static WifiManager getWiFiManager(Context activity) {
 		WifiManager mWiFiManager =null;
 		if (mWiFiManager == null)
 			mWiFiManager = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
 		return mWiFiManager;
 	}
 
-	private static void setBluetooth(Activity activity, ProfileSettings newProfile) {
+	private static void setBluetooth(Context activity, ProfileSettings newProfile) {
 		
 		BluetoothControl mBluetoothControl = null;
 		try {
@@ -90,7 +97,7 @@ public class ProfileSettingUtil {
 		}
 	}
 
-	private static void setVolumen(Activity activity, ProfileSettings newProfile) {
+	private static void setVolumen(Context activity, ProfileSettings newProfile) {
 		AudioManager manager = (AudioManager) activity.getSystemService(Activity.AUDIO_SERVICE);
 		manager.setStreamVolume(AudioManager.STREAM_ALARM, newProfile.ringer_stream_alarm, 0);
 		manager.setStreamVolume(AudioManager.STREAM_RING, newProfile.ringer_stream_ring, 0);
@@ -100,7 +107,7 @@ public class ProfileSettingUtil {
 		manager.setStreamVolume(AudioManager.STREAM_SYSTEM, newProfile.ringer_stream_system, 0);
 	}
 
-	private static void setRinger(Activity mActivity, int ringer) {
+	private static void setRinger(Context mActivity, int ringer) {
 		AudioManager manager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
 		if (manager != null) {
 
@@ -136,19 +143,29 @@ public class ProfileSettingUtil {
 		
 	}
 
-	private static void setSystemBrightness(Activity activity, int brightness) {
+	private void setSystemBrightness(Activity activity, int brightness) {
 		Settings.System.putInt(activity.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
 		
-		int UPDATE_TIMEOUT = 45; // ms
-		LayoutParams attrs = null;
-		if (attrs == null) {
-			attrs = activity.getWindow().getAttributes();
+		// update window brightness with a delay of 300 ms
+		Handler	handler = new Handler();
+		BrigthnessSettingThread bt = new BrigthnessSettingThread();
+		handler.removeCallbacks(bt);
+		handler.postAtTime(bt, SystemClock.uptimeMillis() + UPDATE_TIMEOUT);
+	}
+
+	class BrigthnessSettingThread implements Runnable{
+		@Override
+		public void run() {
+			LayoutParams attrs = null;
+			if (attrs == null) {
+				attrs = mActivity.getWindow().getAttributes();
+			}
+			int MAXIMUM_BACKLIGHT = 255;
+			attrs.screenBrightness = mBrigthness / (float)MAXIMUM_BACKLIGHT;
+			// request brightness update
+			Window window = mActivity.getWindow();
+			window.setAttributes(attrs);
 		}
-		int MAXIMUM_BACKLIGHT = 255;
-		attrs.screenBrightness = brightness / (float)MAXIMUM_BACKLIGHT;
-		// request brightness update
-		Window window = activity.getWindow();
-		window.setAttributes(attrs);
 	}
 	
 }
